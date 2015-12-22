@@ -39,7 +39,7 @@ fi
 newfs -o space /dev/${DEVICE} 
 #mkdir -p ${MOUNTPOINT}
 mount -o noatime /dev/${DEVICE} ${MOUNTPOINT}
-echo ${DEVICE} > ${BASEDIR}/mddevice
+echo ${DEVICE} > ${CDDIR}/mddevice
 
 if [ ! -d ${BASEDIR}${CDMNT} ]; then
     mkdir -p ${BASEDIR}${CDMNT}

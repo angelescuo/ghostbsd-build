@@ -33,7 +33,7 @@ if [ -z "${LOGFILE:-}" ]; then
     exit 1
 fi
 
-DEVICE=`cat ${BASEDIR}/mddevice`
+DEVICE=`cat ${CDDIR}/mddevice`
 
 make_manifest()
 {
@@ -100,7 +100,7 @@ boot()
 mount_ufs()
 {
 DIRSIZE=$(($(du -kd 0 ${BASEDIR}/usr | cut -f 1)))
-echo "${PACK_PROFILE}${ARCH}_${BDATE}_mdsize=$(($DIRSIZE + ($DIRSIZE/10)))" > ${BASEDIR}/dist/mdsize
+echo "${PACK_PROFILE}${ARCH}_${BDATE}_mdsize=$(($DIRSIZE + ($DIRSIZE/10)))" > ${CDDIR}/data/mdsize
 boot
 uniondirs_prepare
 
@@ -115,7 +115,7 @@ if [ "${MD_BACKEND}" = "file" ]
         compress_fs
         mdconfig -d -u ${DEVICE}
 fi
-rm -f ${BASEDIR}/mddevice
+rm -f ${CDDIR}/mddevice
 echo "### Done filesystem compress"
 echo "### Done filesystem compress" >> ${LOGFILE} 2>&1
 }
@@ -127,7 +127,7 @@ echo "Saving mtree structure..." >> ${LOGFILE} 2>&1
 mtree -Pcp ${BASEDIR}/usr/home  > ${BASEDIR}/dist/home.dist
 }
 
-#make_mtree
+
 make_manifest
 mount_ufs
 
