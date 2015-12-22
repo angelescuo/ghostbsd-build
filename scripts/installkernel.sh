@@ -58,10 +58,11 @@ makeargs="${MAKEOPT:-} ${MAKEJ_KERNEL:-} __MAKE_CONF=${MAKE_CONF} TARGET_ARCH=${
 install_fetched_kernel()
 {
 echo "#### Installing kernel for ${ARCH} architecture ####" | tee -a ${LOGFILE}
-cd $BASEDIR
-tar -yxf kernel.txz -C ./ --exclude=\*\.symbols
+cd $CDDIR
+tar -yxf kernel.txz -C $BASEDIR --exclude=\*\.symbols
 rm -f kernel.txz
 }
+
 
 update_freebsd()
 {
@@ -150,6 +151,37 @@ rm -f ${BASEDIR}/etc/resolv.conf
 rm -f ${BASEDIR}/fbsdupdate.conf
 }
 
+mfsroot()
+{
+ramdisk_root="${CDDIR}/data/ramdisk"
+mkdir -p "${ramdisk_root}"
+cd "${BASEDIR}"
+tar -cf - rescue | tar -xf - -C "${ramdisk_root}"
+cd "${LOCALDIR}/scripts"
+install -o root -g wheel -m 755 "init.sh" "${ramdisk_root}"
+mkdir "${ramdisk_root}/dev"
+mkdir "${ramdisk_root}/etc"
+mkdir "${ramdisk_root}/cdrom"
+mkdir "${ramdisk_root}/union"
+mkdir "${ramdisk_root}/sysroot"
+touch "${ramdisk_root}/etc/fstab"
+makefs -b '10%' "${CDDIR}/data/ramdisk.ufs" "${ramdisk_root}"
+gzip "${CDDIR}/data/ramdisk.ufs"
+rm -rf "${ramdisk_root}"
+}
+
+boot()
+{
+    cd "${BASEDIR}"
+    tar -cf - --exclude boot/kernel boot | tar -xf - -C "${CDDIR}"
+    for kfile in kernel geom_uzip.ko nullfs.ko tmpfs.ko unionfs.ko; do
+        tar -cf - boot/kernel/${kfile} | tar -xf - -C "${CDDIR}"
+    done
+    cd "${LOCALDIR}/scripts"
+    install -o root -g wheel -m 644 "loader.conf" "${CDDIR}/boot/"
+}
+
+
 if [ -n "${FETCH_FREEBSDKERNEL:-}" ]; then
     install_fetched_kernel
      #if $JAIL_RESTART ; then
@@ -164,6 +196,9 @@ if [ "${ARCH}" = "i386" ] ; then
     chrootcmd="chroot ${BASEDIR} kldxref /boot/kernel /boot/modules"
     $chrootcmd
 fi
+
+mfsroot
+#boot
 
 set -e
 cd $LOCALDIR

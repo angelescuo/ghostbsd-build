@@ -15,10 +15,12 @@ if [ -z "${LOGFILE:-}" ]; then
     exit 1
 fi
 
+mkdir -p ${CDDIR} ${BASEDIR}
+
 fetch_kernel()
 {
 echo "#### Fetching kernel for ${ARCH} architecture ####" | tee -a ${LOGFILE}
- cd $BASEDIR
+ cd $CDDIR
  fetch ftp://ftp.freebsd.org/pub/FreeBSD/releases/${ARCH}/${FBSDRELEASE}/kernel.txz
 }
 

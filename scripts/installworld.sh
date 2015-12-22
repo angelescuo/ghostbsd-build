@@ -19,27 +19,12 @@ jail_name=${PACK_PROFILE}${ARCH}
 
 mkmd_device()
 {
-UFSFILE=${BASEDIR}/dist/uzip/usrimg
-MOUNTPOINT=${BASEDIR}/usr
-FSSIZE=$(echo "${USR_SIZE}*1024^2" | bc | cut -d . -f1)
+UFSFILE=${CDDIR}/data/sysroot.ufs
+MOUNTPOINT=${BASEDIR}
+FSSIZE=$(echo "${SYS_SIZE}*1024^2" | bc | cut -d . -f1)
 
-for dirs in union uzip ; do
-    if [ ! -d ${BASEDIR}/dist/${dirs} ]; then
-        mkdir -p ${BASEDIR}/dist/${dirs}
-    fi
-done
 
-if [ ! -d ${BASEDIR}${CDMNT} ]; then
-    mkdir -p ${BASEDIR}${CDMNT}
-fi
-
-for dir in  ${UNION_DIRS}; do
-  echo ${dir} >> ${BASEDIR}/dist/uniondirs
-done
-
-if [ ! -d ${BASEDIR}/compat/linux/proc ]; then
-    mkdir -p ${BASEDIR}/compat/linux/proc
-fi
+    mkdir -p ${CDDIR}/data ${CDDIR}/boot 
 
 if [ "${MD_BACKEND}" = "file" ] 
     then
@@ -50,11 +35,19 @@ if [ "${MD_BACKEND}" = "file" ]
         dd if=/dev/zero of=/dev/${DEVICE} bs=1k count=1 seek=$((${FSSIZE} - 1))
 fi
 
-echo ${DEVICE} > ${BASEDIR}/mddevice
 
 newfs -o space /dev/${DEVICE} 
-mkdir -p ${MOUNTPOINT}
+#mkdir -p ${MOUNTPOINT}
 mount -o noatime /dev/${DEVICE} ${MOUNTPOINT}
+echo ${DEVICE} > ${BASEDIR}/mddevice
+
+if [ ! -d ${BASEDIR}${CDMNT} ]; then
+    mkdir -p ${BASEDIR}${CDMNT}
+fi
+
+if [ ! -d ${BASEDIR}/compat/linux/proc ]; then
+    mkdir -p ${BASEDIR}/compat/linux/proc
+fi
 }
 
 install_built_world()
@@ -85,18 +78,19 @@ install_fetched_freebsd()
 echo "#### Installing world for ${ARCH} architecture ####"
 if [ "${ARCH}" = "amd64" ]; then
     for files in ${AMD64_COMPONENTS} ; do
-        cd $BASEDIR
-        tar -yxf ${files}.txz -C ./
+        cd $CDDIR
+        tar -yxf ${files}.txz -C $BASEDIR
         rm -f ${files}.txz
     done
 else 
     for files in ${I386_COMPONENTS} ; do
-        cd $BASEDIR
-        tar -yxf ${files}.txz -C ./
+        cd $CDDIR
+        tar -yxf ${files}.txz -C $BASEDIR
         rm -f ${files}.txz
     done
 fi
 }
+
 
 jail_add()
 {
@@ -211,3 +205,4 @@ fi
 
 set -e
 cd $LOCALDIR
+

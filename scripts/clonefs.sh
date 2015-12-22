@@ -58,13 +58,14 @@ mv -f ${BASEDIR}/mnt/manifest /usr/obj/${ARCH}/${PACK_PROFILE}/$(echo ${ISOPATH}
 
 uniondirs_prepare()
 {
+echo "#### Building bootable ISO image for ${ARCH} ####"
+# Creates etc/fstab to avoid messages about missing it
+if [ ! -e ${BASEDIR}/etc/fstab ] ; then
+    touch ${BASEDIR}/etc/fstab
+fi
+
 echo "### Prepare for compression build environment"
 echo "### Prepare for compression build environment" >> ${LOGFILE} 2>&1
-for files in unionfs uzip ; do
-    if [ -f ${BASEDIR}/etc/rc.d/$files ] ; then
-        chmod 555 ${BASEDIR}/etc/rc.d/$files
-    fi
-done
 # clean packages cache, tmp and var/log 
 rm -f  ${BASEDIR}/var/cache/pkg/*
 rm -Rf ${BASEDIR}/tmp/*
@@ -78,21 +79,33 @@ compress_fs()
 echo "### Compressing filesystem using $MD_BACKEND"
 echo "### Compressing filesystem using $MD_BACKEND" >> ${LOGFILE} 2>&1
 if [ "${MD_BACKEND}" = "file" ] ; then
-  mkuzip -v -o ${BASEDIR}/dist/uzip/usr.uzip -s 65536 ${BASEDIR}/dist/uzip/usrimg >> ${LOGFILE} 2>&1
-  rm -f ${BASEDIR}/dist/uzip/usrimg
+  mkuzip -v -o ${CDDIR}/data/sysroot.uzip -s 65536 ${CDDIR}/data/sysroot.ufs >> ${LOGFILE} 2>&1
+  rm -f ${CDDIR}/data/sysroot.ufs
 else
-  mkuzip -v -o ${BASEDIR}/dist/uzip/usr.uzip  -s 65536 /dev/${DEVICE} >> ${LOGFILE} 2>&1
+  mkuzip -v -o ${BASEDIR}/data/sysroot.uzip  -s 65536 /dev/${DEVICE} >> ${LOGFILE} 2>&1
 fi
+}
+
+boot()
+{
+    cd "${BASEDIR}"
+    tar -cf - --exclude boot/kernel boot | tar -xf - -C "${CDDIR}"
+    for kfile in kernel geom_uzip.ko nullfs.ko tmpfs.ko unionfs.ko; do
+        tar -cf - boot/kernel/${kfile} | tar -xf - -C "${CDDIR}"
+    done
+    cd "${LOCALDIR}/scripts"
+    install -o root -g wheel -m 644 "loader.conf" "${CDDIR}/boot/"
 }
 
 mount_ufs()
 {
 DIRSIZE=$(($(du -kd 0 ${BASEDIR}/usr | cut -f 1)))
 echo "${PACK_PROFILE}${ARCH}_${BDATE}_mdsize=$(($DIRSIZE + ($DIRSIZE/10)))" > ${BASEDIR}/dist/mdsize
-
-MOUNTPOINT=${BASEDIR}/usr
-umount -f ${MOUNTPOINT}
+boot
 uniondirs_prepare
+
+MOUNTPOINT=${BASEDIR}
+umount -f ${MOUNTPOINT}
 
 if [ "${MD_BACKEND}" = "file" ] 
     then
@@ -114,7 +127,7 @@ echo "Saving mtree structure..." >> ${LOGFILE} 2>&1
 mtree -Pcp ${BASEDIR}/usr/home  > ${BASEDIR}/dist/home.dist
 }
 
-make_mtree
+#make_mtree
 make_manifest
 mount_ufs
 

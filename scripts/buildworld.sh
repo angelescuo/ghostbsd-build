@@ -14,6 +14,7 @@ if [ -z "${LOGFILE:-}" ]; then
     echo "Please use launch.sh to execute it."
     exit 1
 fi
+mkdir -p ${CDDIR} ${BASEDIR}
 
 build_world()
 {
@@ -45,21 +46,21 @@ sleep 10
 
 fetch_freebsd()
 {
+cd $CDDIR
+echo $CDDIR
+pwd
 echo "#### Fetching world for ${ARCH} architecture ####" | tee -a ${LOGFILE}
 if [ "${ARCH}" = "amd64" ]; then
     for files in base lib32 ; do
-        cd $BASEDIR
         fetch ftp://ftp.freebsd.org/pub/FreeBSD/releases/${ARCH}/${FBSDRELEASE}/${files}.txz
     done
 else
     for files in base ; do
-        cd $BASEDIR
         fetch ftp://ftp.freebsd.org/pub/FreeBSD/releases/${ARCH}/${FBSDRELEASE}/${files}.txz
     done
 fi
 }
 
-mkdir -p ${BASEDIR}
 
 if [ -n "${FETCH_FREEBSDBASE:-}" ]; then
     fetch_freebsd
