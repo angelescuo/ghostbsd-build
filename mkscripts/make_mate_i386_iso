@@ -19,8 +19,8 @@ export PACK_PROFILE
 ARCH=i386
 export ARCH
 
-USR_SIZE=6.0
-export USR_SIZE
+SYS_SIZE=6.0
+export SYS_SIZE
 
 INSTALL_PORTS=${INSTALL_PORTS:-"audio/faac audio/lame"}
 export INSTALL_PORTS
