@@ -21,16 +21,16 @@ mkmd_device()
 {
 UFSFILE=${CDDIR}/data/sysroot.ufs
 MOUNTPOINT=${BASEDIR}
-FSSIZE=$(echo "${SYS_SIZE}*1024^2" | bc | cut -d . -f1)
 
-
-    mkdir -p ${CDDIR}/data ${CDDIR}/boot 
+mkdir -p ${CDDIR}/data ${CDDIR}/boot 
 
 if [ "${MD_BACKEND}" = "file" ] 
     then
+        FSSIZE=10
         dd if=/dev/zero of=${UFSFILE} bs=1k count=1 seek=$((${FSSIZE} - 1))
         DEVICE=$(mdconfig -a -t vnode -f ${UFSFILE})
     else
+        FSSIZE=$(echo "${SYS_SIZE}*1024^2" | bc | cut -d . -f1)
         DEVICE=$(mdconfig -a -t malloc -s ${FSSIZE}k)
         dd if=/dev/zero of=/dev/${DEVICE} bs=1k count=1 seek=$((${FSSIZE} - 1))
 fi
