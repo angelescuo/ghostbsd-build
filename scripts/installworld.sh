@@ -26,7 +26,7 @@ mkdir -p ${CDDIR}/data ${CDDIR}/boot
 
 if [ "${MD_BACKEND}" = "file" ] 
     then
-        FSSIZE=10
+        FSSIZE=$(echo "${BACKEND_SIZE}*1024^2" | bc | cut -d . -f1)
         dd if=/dev/zero of=${UFSFILE} bs=1k count=1 seek=$((${FSSIZE} - 1))
         DEVICE=$(mdconfig -a -t vnode -f ${UFSFILE})
     else
