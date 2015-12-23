@@ -19,6 +19,8 @@ grub2-efi
 nano
 ntfs-3g
 ksh93
+libiconv 
+# libiconv needed by lame
 mc
 portupgrade
 py27-gobject
