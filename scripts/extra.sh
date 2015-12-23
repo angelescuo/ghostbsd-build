@@ -47,10 +47,20 @@ for plugin in ${EXTRA}; do
     fi
 done
 
+# removes in a fast way ports tree
 if [ -d ${BASEDIR}/dist/ports/Mk ] ; then
     rm -f ${BASEDIR}/usr/ports
     mkdir -p ${BASEDIR}/usr/ports
-    rm -Rf ${BASEDIR}/dist/ports
+
+    if [ -f "${CDDIR}/pdevice" ]; then
+        PDEVICE=$(cat ${CDDIR}/pdevice)
+        if [ -c "/dev/${PDEVICE}" ]; then
+            umount -f /dev/${PDEVICE}
+            mdconfig -d -u ${PDEVICE}
+        fi
+    fi
+    rm -f ${CDDIR}/ports.ufs
+    rm -f ${CDDIR}/pdevice
 fi
 
 if ! ${USE_JAILS}; then
@@ -64,3 +74,10 @@ fi
 # removes from jail resolv.conf
 rm -f ${BASEDIR}/etc/resolv.conf
 
+if [ -f "${CDDIR}/mddevice" ]; then
+    DEVICE=$(cat ${CDDIR}/mddevice)
+    if [ -c "/dev/${DEVICE}" ]; then
+        umount -f /dev/${DEVICE}
+        mdconfig -d -u ${DEVICE}
+    fi
+fi
