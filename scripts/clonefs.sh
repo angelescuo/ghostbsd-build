@@ -72,6 +72,8 @@ rm -Rf ${BASEDIR}/tmp/*
 rm -Rf ${BASEDIR}/var/log/*
 # makes usr/src/sys dir because of cosmetical reason
 mkdir -p ${BASEDIR}/usr/src/sys
+# removes dist dir
+rm -R ${BASEDIR}/dist
 }
 
 compress_fs()
