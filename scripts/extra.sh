@@ -73,11 +73,3 @@ fi
 
 # removes from jail resolv.conf
 rm -f ${BASEDIR}/etc/resolv.conf
-
-if [ -f "${CDDIR}/mddevice" ]; then
-    DEVICE=$(cat ${CDDIR}/mddevice)
-    if [ -c "/dev/${DEVICE}" ]; then
-        umount -f /dev/${DEVICE}
-        mdconfig -d -u ${DEVICE}
-    fi
-fi
