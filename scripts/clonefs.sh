@@ -61,7 +61,9 @@ uniondirs_prepare()
 echo "#### Building bootable ISO image for ${ARCH} ####"
 # Creates etc/fstab to avoid messages about missing it
 if [ ! -e ${BASEDIR}/etc/fstab ] ; then
-    touch ${BASEDIR}/etc/fstab
+    cat << EOF > "${BASEDIR}/etc/fstab"
+fdesc   /dev/fd         fdescfs         rw      0       0
+EOF
 fi
 
 echo "### Prepare for compression build environment"
@@ -134,4 +136,3 @@ make_manifest
 mount_ufs
 
 set -e
-cd ${LOCALDIR}
