@@ -153,21 +153,17 @@ rm -f ${BASEDIR}/fbsdupdate.conf
 
 mfsroot()
 {
-ramdisk_root="${CDDIR}/data/ramdisk"
-mkdir -p "${ramdisk_root}"
+mkdir -p "${CDDIR}"
 cd "${BASEDIR}"
-tar -cf - rescue | tar -xf - -C "${ramdisk_root}"
+tar -cf - rescue | tar -xf - -C "${CDDIR}"
 cd "${LOCALDIR}/scripts"
-install -o root -g wheel -m 755 "init.sh" "${ramdisk_root}"
-mkdir "${ramdisk_root}/dev"
-mkdir "${ramdisk_root}/etc"
-mkdir "${ramdisk_root}/cdrom"
-mkdir "${ramdisk_root}/union"
-mkdir "${ramdisk_root}/sysroot"
-touch "${ramdisk_root}/etc/fstab"
-makefs -b '10%' "${CDDIR}/data/ramdisk.ufs" "${ramdisk_root}"
-gzip "${CDDIR}/data/ramdisk.ufs"
-rm -rf "${ramdisk_root}"
+install -o root -g wheel -m 755 "init.sh" "${CDDIR}"
+mkdir "${CDDIR}/dev"
+mkdir "${CDDIR}/etc"
+mkdir "${CDDIR}/cdrom"
+mkdir "${CDDIR}/union"
+mkdir "${CDDIR}/sysroot"
+touch "${CDDIR}/etc/fstab"
 }
 
 boot()

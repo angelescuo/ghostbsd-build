@@ -47,8 +47,6 @@ sleep 10
 fetch_freebsd()
 {
 cd $CDDIR
-echo $CDDIR
-pwd
 echo "#### Fetching world for ${ARCH} architecture ####" | tee -a ${LOGFILE}
 if [ "${ARCH}" = "amd64" ]; then
     for files in base lib32 ; do
